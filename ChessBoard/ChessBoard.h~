@@ -1,0 +1,22 @@
+#include<iostream>
+#include<string>
+#include<map>
+
+class ChessBoard
+{
+public:
+  ChessBoard();
+  typedef std::map<const char*, ChessPiece> board;
+  board boardPositions;
+  void submitMove(const char* start, const char* end);
+  void resetBoard();
+        
+};
+
+class ChessPiece
+{
+
+};
+
+
+

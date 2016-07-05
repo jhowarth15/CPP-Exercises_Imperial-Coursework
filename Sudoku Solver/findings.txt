@@ -1,0 +1,26 @@
+mystery1.dat is the extremely hard puzzle with 514,267 recursions.
+mystery2.dat is the unsolvable puzzle.
+mystery3.dat is the hard puzzle with 27,330 recursions.
+
+This is because mystery2 could not be solved by the function
+solve_board(board) which solves anything that is not impossible. 
+The function calls itself recursively and if necessary guesses the
+numbers incrementally until the solution is found.
+
+mystery1 is much harder than mystery 3 because the solve_board
+function had to call itself recursively many more times to reach the solution.
+
+The number of times solve_board must call itself recursively is
+measured in the 'count' reference parameter of the modified solve
+function that is solve_board(board, count).
+
+Recursion number or count is directly proportional to the difficulty of the
+puzzle because the function only calls itself again when trying to
+fill a number into a blank if the number also works in
+the current row, column and box. If one of these conditions
+were false, the current number can be dismissed as a candidate without
+calling the function again recusively - dramatically reducing the
+number of possibilities and the amount of guesswork. While a human
+couldn't figure the whole thing out recursively, they could also
+eliminate possibilities using the row, column and box check if the
+sudoku allows them which would make it easier.

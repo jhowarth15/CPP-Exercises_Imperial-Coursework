@@ -1,0 +1,401 @@
+#include "ChessBoard.h"
+
+using namespace std;
+
+ChessPiece:: ChessPiece(std::string a, std::string b)
+{
+  name = a;
+  colour = b;
+  //ownedByBoard = c;
+}
+
+bool ChessPiece:: checkVerticalEmpty(std::string start, std:: string end)
+{
+
+  board myBoard = *ownedByBoard;
+
+  /* //Check piece has access to board.
+  string x = "D1";
+  if (myBoard.find(x) == myBoard.end())
+    {
+      cout << "ACCESS MYBOARD: "<< x << " is empty" << endl;
+    } 
+  else cout << "ACCESS MYBOARD: In position " << x << " is: " << myBoard[x] << endl;
+  */
+ 
+  string square;
+  char f = fileOfMove(start);
+  char r1 = rankOfMove(start);
+  char r2 = rankOfMove(end);
+
+  int rank1 = r1;
+  int rank2 = r2;
+
+  int higherRank;
+  int lowerRank;
+
+  if (rank1>rank2)
+    {
+      higherRank = rank1;
+      lowerRank = rank2 + 1;
+    }
+
+  if (rank2>rank1)
+    {
+      higherRank = rank2;
+      lowerRank = rank1 + 1;
+    }
+
+  for (lowerRank; lowerRank <higherRank; lowerRank++)
+    {
+      stringstream sstm;
+      char rank = lowerRank;
+      sstm << f << rank;
+      square = sstm.str();
+
+      if(myBoard.find(square) != myBoard.end())
+	{
+	  //cout << "Piece in the way at " << square << ":" << endl;
+	  return false;
+	}
+    } 
+  
+  return true;
+
+}
+bool ChessPiece:: checkHorizontalEmpty(std::string start, std:: string end)
+{
+
+  board myBoard = *ownedByBoard;
+
+  string square;
+  char r = rankOfMove(start);
+  char f1 = fileOfMove(start);
+  char f2 = fileOfMove(end);
+
+  int file1 = f1;
+  int file2 = f2;
+
+  int higherFile;
+  int lowerFile;
+
+  if (file1>file2)
+    {
+      higherFile = file1;
+      lowerFile = file2+1;
+    }
+
+  if (file2>file1)
+    {
+      higherFile = file2;
+      lowerFile = file1+1;
+    }
+
+  for (lowerFile; lowerFile<higherFile; lowerFile++)
+    {
+      stringstream sstm;
+      char file = lowerFile;
+      sstm << file << r;
+      square = sstm.str();
+
+      if(myBoard.find(square) != myBoard.end())
+	{
+	  cout << "Piece in the way at " << square << ":" << endl;
+	  return false;
+	}
+    } 
+  
+  return true;
+}
+
+bool ChessPiece:: checkDiagAscendEmpty(std::string start, std:: string end)
+{
+  
+  board myBoard = *ownedByBoard;
+
+  string square;
+  char r1 = rankOfMove(start);
+  char r2 = rankOfMove(end);
+  char f1 = fileOfMove(start);
+  char f2 = fileOfMove(end);
+
+  int rank1 = r1;
+  int rank2 = r2;
+  int file1 = f1;
+  int file2 = f2;
+
+  int higherFile;
+  int lowerFile;
+  int lowerRank;
+
+  if (file1>file2)
+    {
+      higherFile = file1;
+      lowerFile = file2+1;
+      lowerRank = rank2+1;
+    }
+
+  if (file2>file1)
+    {
+      higherFile = file2;
+      lowerFile = file1+1;
+      lowerRank = rank1+1;
+    }
+
+  for (lowerFile; lowerFile<higherFile; lowerFile++)
+    {
+      stringstream sstm;
+      char file = lowerFile;
+      char rank = lowerRank;
+      sstm << file << rank;
+      square = sstm.str();
+
+      if(myBoard.find(square) != myBoard.end())
+	{
+	  cout << "Piece in the way at " << square << ":" << endl;
+	  return false;
+	}
+      lowerRank++;
+    } 
+  
+  return true;
+}
+
+bool ChessPiece:: checkDiagDescendEmpty(std::string start, std:: string end)
+{
+ 
+  board myBoard = *ownedByBoard;
+
+  string square;
+  char r1 = rankOfMove(start);
+  char r2 = rankOfMove(end);
+  char f1 = fileOfMove(start);
+  char f2 = fileOfMove(end);
+
+  int rank1 = r1;
+  int rank2 = r2;
+  int file1 = f1;
+  int file2 = f2;
+
+  int higherFile;
+  int lowerFile;
+  int higherRank;
+
+  if (file1>file2)
+    {
+      higherFile = file1;
+      lowerFile = file2+1;
+      higherRank = rank2-1;
+    }
+
+  if (file2>file1)
+    {
+      higherFile = file2;
+      lowerFile = file1+1;
+      higherRank = rank1-1;
+    }
+
+  for (lowerFile; lowerFile<higherFile; lowerFile++)
+    {
+      stringstream sstm;
+      char file = lowerFile;
+      char rank = higherRank;
+      sstm << file << rank;
+      square = sstm.str();
+
+      if(myBoard.find(square) != myBoard.end())
+	{
+	  //cout << "Piece in the way at " << square << ":" << endl;
+	  return false;
+	}
+      higherRank--;
+    } 
+  
+  return true;
+}
+
+
+
+bool Knight:: possMove(string start, string end)
+{
+  char startFile = fileOfMove(start);
+  char startRank = rankOfMove(start);
+
+  char endFile = fileOfMove(end);
+  char endRank = rankOfMove(end);
+
+  int diffFile = endFile - startFile;
+  int diffRank = endRank - startRank;
+
+  if ((diffRank==2 || diffRank==-2) && (diffFile==1 || diffFile ==-1))
+    {
+      return true;
+    }
+
+  if ((diffRank==1 || diffRank==-1) && (diffFile==2 || diffFile ==-2))
+    {
+      return true;
+    }
+
+  return false;
+}
+
+bool Castle:: possMove(string start, string end)
+{
+  char startFile = fileOfMove(start);
+  char startRank = rankOfMove(start);
+
+  char endFile = fileOfMove(end);
+  char endRank = rankOfMove(end);
+
+  int diffFile = endFile - startFile;
+  int diffRank = endRank - startRank;
+
+  if (diffRank!=0 && diffFile==0)
+    {
+      return checkVerticalEmpty(start, end);
+    }
+
+  if (diffRank==0 && diffFile!=0)
+    {
+      return checkHorizontalEmpty(start, end);
+    }
+  return false;
+}
+
+bool Bishop:: possMove(string start, string end)
+{
+  char startFile = fileOfMove(start);
+  char startRank = rankOfMove(start);
+
+  char endFile = fileOfMove(end);
+  char endRank = rankOfMove(end);
+
+  int diffFile = endFile - startFile;
+  int diffRank = endRank - startRank;
+
+  int negDiffFile = - diffFile;
+
+  if (diffRank==diffFile)
+    {
+      return checkDiagAscendEmpty(start, end);
+    }
+
+  if (diffRank==negDiffFile)
+    {
+      return checkDiagDescendEmpty(start, end);
+    }
+  return false;
+}
+
+bool Queen:: possMove(string start, string end)
+{
+  char startFile = fileOfMove(start);
+  char startRank = rankOfMove(start);
+
+  char endFile = fileOfMove(end);
+  char endRank = rankOfMove(end);
+
+  int diffFile = endFile - startFile;
+  int diffRank = endRank - startRank;
+
+  int negDiffFile = - diffFile;
+
+  if (diffRank==diffFile)
+    {
+      return checkDiagAscendEmpty(start, end);
+    }
+
+  if (diffRank==negDiffFile)
+    {
+      return checkDiagDescendEmpty(start, end);
+    }
+
+  if (diffRank!=0 && diffFile==0)
+    {
+      return checkVerticalEmpty(start, end);
+    }
+
+  if (diffRank==0 && diffFile!=0)
+    {
+      return checkHorizontalEmpty(start, end);
+    }
+
+  return false;
+}
+
+bool King:: possMove(string start, string end)
+{
+  char startFile = fileOfMove(start);
+  char startRank = rankOfMove(start);
+
+  char endFile = fileOfMove(end);
+  char endRank = rankOfMove(end);
+
+  int diffFile = endFile - startFile;
+  int diffRank = endRank - startRank;
+
+  if ((diffRank<=1 && diffRank >=-1)
+      && (diffFile<=1 && diffFile >=-1))
+    {
+      return true;
+    }
+
+  return false;
+}
+
+bool Pawn:: possMove(string start, string end)
+{
+  char startFile = fileOfMove(start);
+  char startRank = rankOfMove(start);
+
+  char endFile = fileOfMove(end);
+  char endRank = rankOfMove(end);
+
+  int diffFile = endFile - startFile;
+  int diffRank = endRank - startRank;
+
+
+  board myBoard = *ownedByBoard;
+
+  if (this->colour=="White's")
+    {
+      if (diffRank==1 && diffFile==0 && myBoard.find(end) == myBoard.end())
+	{
+	  return true;
+	}
+
+      if (diffRank==1 && (diffFile==1 || diffFile==-1) 
+	  && myBoard.find(end) != myBoard.end())
+	{
+	  return true;
+	}
+      
+      if (startRank=='2' && diffRank==2)
+	{
+	  return true;
+	}
+    }
+
+  if (this->colour=="Black's")
+    {
+      if (diffRank==-1 && diffFile==0 && myBoard.find(end) == myBoard.end())
+	{
+	  return true;
+	}
+
+      if (diffRank==-1 && (diffFile==-1 || diffFile==1) 
+	  && myBoard.find(end) != myBoard.end())
+	{
+	  return true;
+	}
+      
+      if (startRank=='7' && diffRank==-2)
+	{
+	  return true;
+	}
+
+    }
+
+  return false;
+}

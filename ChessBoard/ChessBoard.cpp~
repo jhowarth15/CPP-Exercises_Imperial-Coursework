@@ -1,0 +1,501 @@
+#include "ChessBoard.h"
+
+using namespace std;
+
+//ChessBoard class
+
+ChessBoard::ChessBoard()
+  {
+
+    cout << "A new chess game is started!" << endl;
+    turnCount = 0;
+
+    //Pointer to this ChessBoard class's board to label pieces.
+    board *boardPositionsPtr = new board;
+
+    //Create instances of pieces.
+    // White pieces.
+    ChessPiece* WP = new Pawn("Pawn","White's");
+    ChessPiece* WK = new King("King","White's");
+    ChessPiece* WKn = new Knight("Knight","White's");
+    ChessPiece* WC = new Castle("Castle","White's");
+    ChessPiece* WB = new Bishop("Bishop","White's");
+    ChessPiece* WQ = new Queen("Queen","White's");
+
+
+    //Black pieces.
+    ChessPiece* BP = new Pawn("Pawn","Black's");
+    ChessPiece* BK = new King("King","Black's");
+    ChessPiece* BKn = new Knight("Knight","Black's");
+    ChessPiece* BC = new Castle("Castle","Black's");
+    ChessPiece* BB = new Bishop("Bishop","Black's");
+    ChessPiece* BQ = new Queen("Queen","Black's");
+
+
+
+    //Initialise board positions
+    char r;
+    string position;
+
+    //White pawn locations.
+    string pawnName;
+    r = '2';
+    for (int f='A'; f<='H'; f++)
+      {
+	    char chFile = f;
+
+	    stringstream sstm;
+	    sstm << chFile << r;
+	    position = sstm.str();
+
+	    (*boardPositionsPtr)[position] = WP;
+	    //cout << "White pawn placed at:" << endl << position << endl;
+      }
+
+    //Black pawn locations.
+    r = '7';
+    for (int f='A'; f<='H'; f++)
+      {
+	    char chFile = f;
+
+	    stringstream sstm;
+	    sstm << chFile << r;
+	    position = sstm.str();
+
+	    (*boardPositionsPtr)[position] = BP;
+	    //cout << "Black pawn placed at:" << endl << position << endl;
+      }
+
+    //King locations.
+    (*boardPositionsPtr)["E1"] = WK;
+    (*boardPositionsPtr)["E8"] = BK;
+
+    //Knights.
+    (*boardPositionsPtr)["B1"] = WKn;
+    (*boardPositionsPtr)["G1"] = WKn;
+    (*boardPositionsPtr)["B8"] = BKn;
+    (*boardPositionsPtr)["G8"] = BKn;
+
+    //Castles.
+    (*boardPositionsPtr)["A1"] = WC;
+    (*boardPositionsPtr)["H1"] = WC;
+    (*boardPositionsPtr)["A8"] = BC;
+    (*boardPositionsPtr)["H8"] = BC;
+
+    //Bishops.
+    (*boardPositionsPtr)["C1"] = WB;
+    (*boardPositionsPtr)["F1"] = WB;
+    (*boardPositionsPtr)["C8"] = BB;
+    (*boardPositionsPtr)["F8"] = BB;
+
+    //Queens.
+    (*boardPositionsPtr)["D1"] = WQ;
+    (*boardPositionsPtr)["D8"] = BQ;    
+
+
+    //Label the chessboard and the chesspieces with the pointer to the map.
+    this->boardPositions = boardPositionsPtr;
+    //cout << "Pointer: " << boardPositionsPtr << endl;
+    WC->ownedByBoard = boardPositions;
+    //cout << "Pointer: " << WC->ownedByBoard << endl;
+    BC->ownedByBoard = boardPositions;
+    WK->ownedByBoard = boardPositions;
+    BK->ownedByBoard = boardPositions;
+    WKn->ownedByBoard = boardPositions;
+    BKn->ownedByBoard = boardPositions;
+    WP->ownedByBoard = boardPositions;
+    BP->ownedByBoard = boardPositions;
+    WB->ownedByBoard = boardPositions;
+    BB->ownedByBoard = boardPositions;
+    WQ->ownedByBoard = boardPositions;
+    BQ->ownedByBoard = boardPositions;
+
+    //Mark where the kings are.
+    whiteKingLocation = "E1";
+    blackKingLocation = "E8";
+
+
+  }
+
+
+ostream& operator<<(ostream& o, const ChessPiece* cp)
+{
+  return o << cp->colour << " " << cp->name;
+}
+
+void ChessBoard::submitMove (string start, string end)
+{
+  //Check start and end lie within board.
+  if (checkMove(start)==false || checkMove(end)==false)
+    {
+      return;
+    }
+
+  //See what piece is to be moved and targeted.
+  ChessPiece* chosen;
+  ChessPiece* target;
+
+  if(boardPositions->find(start) == boardPositions->end())
+    {
+      cout<<"There is no piece at position " << start << "!"<<endl;
+      return;
+    }
+
+  chosen = (*boardPositions)[start];
+
+  
+  //Check that the piece being moved corresponds to the person's colour.
+  string mover = chosen->colour;
+  if (mover=="White's" && turnCount%2==1)
+    {
+      cout << "It is not White's turn to move!" << endl;
+      return;
+    }
+
+  if (mover=="Black's" && turnCount%2==0)
+    {
+      cout << "It is not Black's turn to move!" << endl;
+      return;
+    }
+  
+
+  //Check if there's a piece there about to be taken.
+  bool combat = false;
+  //If it's the king then disallow.
+
+
+
+
+  if(boardPositions->find(end) != boardPositions->end())
+    {
+      target = (*boardPositions)[end];
+      combat = true;
+    }
+
+  //Check target is not same colour.
+    if (combat==true && target->colour==chosen->colour)
+    {
+      cout << "Illegal move - target piece " << target << " is same colour as " << chosen << endl;
+      return;
+    }
+
+  //Check that the move meets piece criteria with piece class.
+      if (chosen->possMove(start, end)==false)
+    {
+      cout << start << " to " << end << " is not a possible move for " << chosen << endl;
+      return;
+    }
+
+  //Change kingLocation string marker
+      if (start==whiteKingLocation)
+	{
+	  whiteKingLocation=end;
+	}    
+      if (start==blackKingLocation)
+	{
+	  blackKingLocation=end;
+	}
+
+
+  //Move the piece.
+  (*boardPositions)[end] = chosen;
+
+  //Delete where it started.
+  boardPositions->erase(start);
+  
+  //Output move.
+  cout << chosen << " moves from " << start << " to " << end;
+  //Ouput if target.
+  if (combat==true)
+    {
+      cout << " taking " << target;
+    }
+  cout << endl;
+
+  //See if either king is in check.
+  //cout << "White King's location: " << whiteKingLocation << endl;
+  //cout << "Black King's location: " << blackKingLocation << endl;
+
+  if(testCheck(whiteKingLocation)==true)
+    {
+      cout << "White is in check" << endl;
+    }
+  if(testCheck(blackKingLocation)==true)
+    {
+      cout << "Black is in check." << endl;
+    }
+
+  //If you put yourself in check then reverse.
+
+  //See if opponent's king is in checkmate.
+  
+  if(chosen->colour=="Black's")
+    {
+      if(testCheckmate(whiteKingLocation)==true)
+	{
+	  cout << "White is in checkmate";
+	  //resetboard
+	  //return;
+	}
+    }
+
+  if(chosen->colour=="White's")
+    {
+      if(testCheckmate(blackKingLocation)==true)
+	{
+	  cout << "Black is in checkmate";
+	  //resetboard
+	  //return;
+	}
+    }
+  
+  turnCount++;
+
+  return;
+}
+
+void ChessBoard::resetBoard()
+{
+  
+}
+
+bool checkMove(std::string move)
+{
+ int length = move.length();
+
+ if (length!=2)
+   {
+   cout << "Incorrect number of characters in move specification " << move << endl;
+   return false;
+   }
+
+  char f = move[0]; 
+  char r = move[1]; 
+
+  if (f<'A' || f>'H')
+    {
+      cout << "File " << f << " does not lie within the board range A-H" << endl;
+      return false;
+    }
+
+  if (r<'1' || r>'8')
+    {
+      cout << "Rank " << r << " does not lie within the board range 1-8" << endl;
+      return false;
+    }
+
+  else return true;
+}
+
+char rankOfMove(std::string move)
+{
+  char r = move[1]; 
+  //cout << r;
+  return r;
+}
+
+char fileOfMove(std::string move)
+{
+  char f = move[0]; 
+  //cout << f;
+  return f;
+}
+
+
+bool ChessBoard::testCheck(std::string kingLocation)
+{
+  //ChessPiece *king = (*boardPositions)[kingLocation];
+  board myBoard = *boardPositions;
+  //string colour = king->colour;
+
+  //cout << "test check piece is: " << king << endl;
+
+  //Check:
+  //If there exists a submitmove(x, kingLocation) by colour that just made move and fn returns true then it is check
+
+  int startF = startFile;
+  int startR = startRank;
+  int endF = endFile;
+  int endR = endRank;
+  string tryMove;
+
+  for (startF; startF<=endF; startF++)
+    {
+      startR = startRank;
+      for (startR; startR<=endR; startR++)
+	{
+	  stringstream sstm;
+	  char testR = startR;
+	  char testF = startF;
+	  sstm << testF << testR;
+	  tryMove = sstm.str();
+
+	  //cout << "Try to check from: " << tryMove << endl;
+
+	  if(testMove(tryMove, kingLocation)==true)
+	    {
+	      return true;
+	    }
+	}
+    }
+
+  return false;
+}
+
+bool ChessBoard::testMove (string start, string end)
+{
+  //Check start and end lie within board.
+  if (checkMove(start)==false || checkMove(end)==false)
+    {
+      return false;
+    }
+
+  //See what piece is to be moved and targeted.
+  ChessPiece* chosen;
+  ChessPiece* target;
+
+  if(boardPositions->find(start) == boardPositions->end())
+    {
+      return false;
+    }
+
+  chosen = (*boardPositions)[start];
+  
+  //Check that the piece being moved corresponds to the person's colour.
+  string mover = chosen->colour;
+
+  //Check if there's a piece there about to be taken.
+  bool combat = false;
+  //If it's the king then disallow.
+
+  if(boardPositions->find(end) != boardPositions->end())
+    {
+      target = (*boardPositions)[end];
+      combat = true;
+    }
+
+  //Check target is not same colour.
+    if (combat==true && target->colour==chosen->colour)
+    {
+      return false;
+    }
+
+  //Check that the move meets piece criteria with piece class.
+      if (chosen->possMove(start, end)==false)
+    {
+      return false;
+    }
+  
+  //Output move.
+  //cout << chosen << " could check from " << start << " to " << end;
+  //Ouput if target.
+  /*if (combat==true)
+    {
+      cout << " taking " << target;
+    }
+    cout << endl;*/
+
+
+  return true;
+}
+
+
+bool ChessBoard::testCheckmate(std::string kingLocation)
+{
+
+  //Checkmate:
+  //If there does not exist any testmove() by next colour that removes them from check and also returns true
+  board myBoard = *boardPositions;
+  ChessPiece *king = myBoard[kingLocation];
+
+  string colour = king->colour;
+  string hypotheticalKingLocation = kingLocation;
+
+  int startF = startFile;
+  int startR = startRank;
+  int endF = endFile;
+  int endR = endRank;
+  string tryMove;
+
+  int startF2 = startFile;
+  int startR2 = startRank;
+  int endF2 = endFile;
+  int endR2 = endRank;
+  string endMove;
+
+  ChessPiece *mover;
+
+
+   
+  for (startF2; startF2<=endF2; startF2++)
+    {
+      startR2 = startRank;
+      for (startR2; startR2<=endR2; startR2++)
+	{
+	  stringstream sstm2;
+	  char testR2 = startR2;
+	  char testF2 = startF2;
+	  sstm2 << testF2 << testR2;
+	  endMove = sstm2.str();
+
+	  //endMove = "B7";
+  
+	  for (startF; startF<=endF; startF++)
+	    {
+	      startR = startRank;
+	      for (startR; startR<=endR; startR++)
+		{
+		  stringstream sstm;
+		  char testR = startR;
+		  char testF = startF;
+		  sstm << testF << testR;
+		  tryMove = sstm.str();
+		  
+		  if (boardPositions->find(tryMove) != boardPositions->end())
+		    {
+		      
+		    
+
+		      mover = (*boardPositions)[tryMove];
+		  
+		      cout << tryMove << endMove << endl;;
+
+
+		      if((mover->name!="King")
+			 &&(testMove(tryMove, endMove)==true)
+			 && (colour==mover->colour)) //It is the defendant's piece
+			{
+			  cout << "HEREEE" << endl;
+			  if(testCheck(kingLocation)!=true)
+			    {
+			      //return false;
+			    }
+			}
+		  /*
+		    if((mover->name=="King")
+		    &&(testMove(tryMove, endMove)==true)
+		    && (colour==mover->colour))
+		    {
+		    hypotheticalKingLocation = endMove;
+
+		    if(testCheck(hypotheticalKingLocation)!=true)
+		    {
+		    return false;
+		    }
+		    }*/
+
+		    }		  
+
+
+		    }
+	    }
+	}
+    }
+  
+
+		  
+
+  
+  return false;
+
+}
